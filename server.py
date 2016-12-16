@@ -34,6 +34,7 @@ class DNSQuery:
                         self.query_Class = self.raw_queries[endindex + 2 : endindex + 4]
 
                         break
+
                 self.query_Name = ''.join(map(isLDH, self.query_Name))
                 self.query_Type = struct.unpack('>H', self.query_Type)[0]
                 self.query_Class = struct.unpack('>H', self.query_Class)[0]
@@ -43,7 +44,7 @@ class DNSQuery:
             return ''
 
         namelen = len(self.query_Name)
-        isinmap = dnsmap.has_key(self.query_name[: namelen - 1])
+        isinmap = dnsmap.has_key(self.query_Name[: namelen - 1])
 
         response_packet = struct.pack('>H', self.tid)
 
@@ -74,7 +75,7 @@ class DNSQuery:
         response_packet += struct.pack('>H', self.query_Class)
 
         response_packet += "\xc0\x0c"
-        response_packet += struct.pack('>H', 1)
+        response_packet += struct.pack('>H', self.query_Type)
         response_packet += struct.pack('>H', self.query_Class)
         response_packet += struct.pack('>I', 60)
 
@@ -121,7 +122,8 @@ if __name__ == "__main__":
             else:
                 print (requestname, ' Request from [', addr[0], '] ->', 'Response: Non-existent domain')
 
-                udps_dsc.sendto(dnspacket.MakeResponse(dnsmap), addr)
+            udps_dsc.sendto(dnspacket.MakeResponse(dnsmap), addr)
+
     except KeyboardInterrupt:
         udps_dsc.close()
         exit(0)
